@@ -1,5 +1,7 @@
 package models
 
+import "time"
+
 /**
 CREATE TABLE `admin` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
@@ -28,24 +30,24 @@ CREATE TABLE `auth_token` (
 */
 
 type Admin struct {
-	Id       int    `db:"id"`
-	Name     string `db:"name"`
-	Email    string `db:"email"`
-	IsActive int    `db:"is_active"`
-	Created  string `db:"created"`
-	Updated  string `db:"updated"`
+	Id       int       `db:"id"`
+	Name     string    `db:"name"`
+	Email    string    `db:"email"`
+	IsActive int       `db:"is_active"`
+	Created  time.Time `db:"created"`
+	Updated  time.Time `db:"updated"`
 }
 
 type AuthToken struct {
-	Id        int    `db:"id"`
-	AdminId   int    `db:"admin_id"`
-	AuthToken string `db:"auth_token"`
-	IsActive  int    `db:"is_active"`
-	Created   string `db:"created"`
-	Updated   string `db:"updated"`
+	Id        int       `db:"id"`
+	AdminId   int       `db:"admin_id"`
+	AuthToken string    `db:"auth_token"`
+	IsActive  int       `db:"is_active"`
+	Created   time.Time `db:"created"`
+	Updated   time.Time `db:"updated"`
 }
 
 const (
-	AdminTableName = "admin"
+	AdminTableName     = "admin"
 	AuthTokenTableName = "auth_token"
 )

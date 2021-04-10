@@ -15,3 +15,14 @@ func (s *Services) CreateCity(ctx context.Context, city *models.City) error {
 	)
 	return err
 }
+
+func (s *Services) GetCity(ctx context.Context, id int) (*models.City, error) {
+	city := models.City{}
+	err := s.Sequel.GetContext(ctx, &city, "SELECT * FROM " +
+		models.CitiesTableName +
+		" WHERE id=?",id)
+	if err != nil {
+		return nil, err
+	}
+	return &city, nil
+}

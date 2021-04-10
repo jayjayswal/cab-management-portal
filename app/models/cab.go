@@ -1,5 +1,7 @@
 package models
 
+import "time"
+
 /**
 CREATE TABLE `cabs` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
@@ -32,35 +34,38 @@ CREATE TABLE `cabs_idle_duration` (
 */
 
 type Cab struct {
-	Id            int    `db:"id"`
-	CabNumber     string `db:"cab_number"`
-	CurrentState  string `db:"current_state"`
-	CurrentCityId *int   `db:"current_city_id"`
-	IsActive      int    `db:"is_active"`
-	LastUpdatedBy int    `db:"last_updated_by"`
-	Created       string `db:"created"`
-	Updated       string `db:"updated"`
+	Id              int       `db:"id"`
+	CabNumber       string    `db:"cab_number"`
+	CurrentState    string    `db:"current_state"`
+	CurrentCityId   *int      `db:"current_city_id"`
+	IsActive        int       `db:"is_active"`
+	LastUpdatedBy   int       `db:"last_updated_by"`
+	LastRideEndTime time.Time `db:"last_ride_end_time"`
+	Created         time.Time `db:"created"`
+	Updated         time.Time `db:"updated"`
 }
 
 type CabAudit struct {
-	Id            int    `db:"id"`
-	CurrentState  string `db:"current_state"`
-	CurrentCityId int    `db:"current_city_id"`
-	IsActive      int    `db:"is_active"`
-	LastUpdatedBy int    `db:"last_updated_by"`
-	Created       string `db:"created"`
-	Updated       string `db:"updated"`
-	AuditAddedAt  string `db:"audit_added_at"`
+	Id              int       `db:"id"`
+	CabNumber       string    `db:"cab_number"`
+	CurrentState    string    `db:"current_state"`
+	CurrentCityId   int       `db:"current_city_id"`
+	IsActive        int       `db:"is_active"`
+	LastUpdatedBy   int       `db:"last_updated_by"`
+	LastRideEndTime time.Time `db:"last_ride_end_time"`
+	Created         time.Time `db:"created"`
+	Updated         time.Time `db:"updated"`
+	AuditAddedAt    time.Time `db:"audit_added_at"`
 }
 
 type CabIdleDuration struct {
-	Id            int     `db:"id"`
-	CabId         int     `db:"cab_id"`
-	IdleStartTime string  `db:"idle_start_time"`
-	IdleEndTime   string  `db:"idle_end_time"`
-	TotalDuration float32 `db:"total_duration"`
-	Created       string  `db:"created"`
-	Updated       string  `db:"updated"`
+	Id            int       `db:"id"`
+	CabId         int       `db:"cab_id"`
+	IdleStartTime time.Time `db:"idle_start_time"`
+	IdleEndTime   time.Time `db:"idle_end_time"`
+	TotalDuration float32   `db:"total_duration"`
+	Created       time.Time `db:"created"`
+	Updated       time.Time `db:"updated"`
 }
 
 const (

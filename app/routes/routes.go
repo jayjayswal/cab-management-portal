@@ -36,11 +36,14 @@ func Init(dependencies *utilEntities.Dependencies) *mux.Router {
 
 	cabRouter := apiRouter.PathPrefix("/cab").Subrouter()
 	cabRouter.HandleFunc("/create", handler.CreateCab).Methods(http.MethodPost)
+	cabRouter.HandleFunc("/updateCity", handler.UpdateCity).Methods(http.MethodPut)
 	//articlesRouter.HandleFunc("/all", handler.GetAllCities).Methods(http.MethodGet)
 	//articlesRouter.HandleFunc("/{articlesId}", handler.GetCity).Methods(http.MethodGet)
 	//articlesRouter.HandleFunc("/update", handler.UpdateCity).Methods(http.MethodPut)
 	//articlesRouter.HandleFunc("/{articlesId}", handler.DeleteCity).Methods(http.MethodDelete)
 
+	rideRouter := apiRouter.PathPrefix("/ride").Subrouter()
+	rideRouter.HandleFunc("/request-new-ride", handler.CreateCab).Methods(http.MethodPost)
 
 	return dependencies.Router
 }

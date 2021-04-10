@@ -1,5 +1,7 @@
 package models
 
+import "time"
+
 /**
 CREATE TABLE `cities` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
@@ -14,12 +16,12 @@ CREATE TABLE `cities` (
 */
 
 type City struct {
-	Id            int    `db:"id"`
-	Name          string `db:"name"`
-	IsActive      int    `db:"is_active"`
-	LastUpdatedBy int    `db:"last_updated_by"`
-	Created       string `db:"created"`
-	Updated       string `db:"updated"`
+	Id            int       `db:"id"`
+	Name          string    `db:"name"`
+	IsActive      int       `db:"is_active"`
+	LastUpdatedBy int       `db:"last_updated_by"`
+	Created       time.Time `db:"created"`
+	Updated       time.Time `db:"updated"`
 }
 
 const (
