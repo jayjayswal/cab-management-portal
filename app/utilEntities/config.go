@@ -16,14 +16,14 @@ func GetConfigHelper(environment *Environment) *ConfigHelper {
 			Host:     "127.0.0.1:3306",
 			Username: "root",
 			Password: "mysqlroot",
-			Database: "test",
+			Database: "cabBooking",
 		}
 	} else if environment.Tier == constants.ProdTier {
 		sequelConfig = configs.SequelConfig{
 			Host:     "127.0.0.1:3306",
 			Username: "root",
 			Password: "mysqlroot",
-			Database: "test",
+			Database: "cabBooking",
 		}
 	}
 	return &ConfigHelper{

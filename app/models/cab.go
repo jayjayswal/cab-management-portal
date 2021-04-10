@@ -33,8 +33,9 @@ CREATE TABLE `cabs_idle_duration` (
 
 type Cab struct {
 	Id            int    `db:"id"`
+	CabNumber     string `db:"cab_number"`
 	CurrentState  string `db:"current_state"`
-	CurrentCityId int    `db:"current_city_id"`
+	CurrentCityId *int   `db:"current_city_id"`
 	IsActive      int    `db:"is_active"`
 	LastUpdatedBy int    `db:"last_updated_by"`
 	Created       string `db:"created"`

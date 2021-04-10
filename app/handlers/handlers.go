@@ -35,11 +35,20 @@ func (h *Handler) WriteJSONResponse(w http.ResponseWriter, resp string, statusCo
 	return nil
 }
 
-func (h *Handler) WriteErrorResponse(w http.ResponseWriter, resp string, statusCode int) error {
+func (h *Handler) Write500ErrorResponse(w http.ResponseWriter) error {
 	w.Header().Add("Content-Type", "application/json")
-	w.WriteHeader(statusCode)
-	_, writeError := w.Write([]byte(resp))
-	//_, writeError := w.Write([]byte(fmt.Sprintf("%v", resp)))
+	w.WriteHeader(503)
+	_, writeError := w.Write([]byte("{'message':'Something went wrong, Please try again'}"))
+	if writeError != nil {
+		h.logger.Print(writeError.Error())
+	}
+	return nil
+}
+
+func (h *Handler) Write404ErrorResponse(w http.ResponseWriter) error {
+	w.Header().Add("Content-Type", "application/json")
+	w.WriteHeader(404)
+	_, writeError := w.Write([]byte("{'message':'Object Not found, Try again later'}"))
 	if writeError != nil {
 		h.logger.Print(writeError.Error())
 	}

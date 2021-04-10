@@ -6,6 +6,7 @@ import (
 	"cab-management-portal/app/servies"
 	"cab-management-portal/app/utilEntities"
 	"github.com/gorilla/mux"
+	"net/http"
 )
 
 func Init(dependencies *utilEntities.Dependencies) *mux.Router {
@@ -23,8 +24,22 @@ func Init(dependencies *utilEntities.Dependencies) *mux.Router {
 		controller,
 	)
 
-	dependencies.Router.HandleFunc("/",handler.HealthCheck)
-	//_ := dependencies.Router.PathPrefix("/api").Subrouter()
+	apiRouter := dependencies.Router.PathPrefix("/api").Subrouter()
+	apiRouter.HandleFunc("/",handler.HealthCheck)
+
+	cityRouter := apiRouter.PathPrefix("/city").Subrouter()
+	cityRouter.HandleFunc("/create", handler.CreateCity).Methods(http.MethodPost)
+	//articlesRouter.HandleFunc("/all", handler.GetAllCities).Methods(http.MethodGet)
+	//articlesRouter.HandleFunc("/{articlesId}", handler.GetCity).Methods(http.MethodGet)
+	//articlesRouter.HandleFunc("/update", handler.UpdateCity).Methods(http.MethodPut)
+	//articlesRouter.HandleFunc("/{articlesId}", handler.DeleteCity).Methods(http.MethodDelete)
+
+	cabRouter := apiRouter.PathPrefix("/cab").Subrouter()
+	cabRouter.HandleFunc("/create", handler.CreateCab).Methods(http.MethodPost)
+	//articlesRouter.HandleFunc("/all", handler.GetAllCities).Methods(http.MethodGet)
+	//articlesRouter.HandleFunc("/{articlesId}", handler.GetCity).Methods(http.MethodGet)
+	//articlesRouter.HandleFunc("/update", handler.UpdateCity).Methods(http.MethodPut)
+	//articlesRouter.HandleFunc("/{articlesId}", handler.DeleteCity).Methods(http.MethodDelete)
 
 
 	return dependencies.Router
