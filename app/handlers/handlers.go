@@ -3,6 +3,7 @@ package handlers
 import (
 	controllers "cab-management-portal/app/controllers"
 	"cab-management-portal/app/utilEntities"
+	"gopkg.in/go-playground/validator.v9"
 	"log"
 	"net/http"
 )
@@ -10,6 +11,7 @@ import (
 type Handler struct {
 	controller *controllers.Controller
 	logger     *log.Logger
+	validator  *validator.Validate
 	//routeHelpers common.RouteHelpers
 	//utilHelpers  common.UtilHelpers
 }
@@ -21,6 +23,7 @@ func GetNewHandler(
 	return &Handler{
 		logger:     dependencies.Logger,
 		controller: controller,
+		validator:  dependencies.Validator,
 	}
 }
 

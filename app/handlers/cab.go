@@ -19,6 +19,12 @@ func (h *Handler) CreateCab(writer http.ResponseWriter, request *http.Request) {
 		_ = h.Write500ErrorResponse(writer, err)
 		return
 	}
+	err = h.validator.Struct(obj)
+	if err != nil {
+		h.logger.Print(err.Error())
+		_ = h.Write500ErrorResponse(writer, err)
+		return
+	}
 	err = h.controller.CreateCab(context.Background(), &obj)
 	if err != nil {
 		h.logger.Print(err.Error())
@@ -32,6 +38,12 @@ func (h *Handler) UpdateCity(writer http.ResponseWriter, request *http.Request) 
 	reqBody, _ := ioutil.ReadAll(request.Body)
 	var obj controllers.UpdateCityPayload
 	err := json.Unmarshal(reqBody, &obj)
+	if err != nil {
+		h.logger.Print(err.Error())
+		_ = h.Write500ErrorResponse(writer, err)
+		return
+	}
+	err = h.validator.Struct(obj)
 	if err != nil {
 		h.logger.Print(err.Error())
 		_ = h.Write500ErrorResponse(writer, err)

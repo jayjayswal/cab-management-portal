@@ -44,11 +44,11 @@ func (c *Controller) GetCabActivities(ctx context.Context, cabId int) ([]models.
 }
 
 type CreateCabPayload struct {
-	CabNumber     string `json:"cab_number"`
+	CabNumber     string `json:"cab_number" validate:"required,min=6,max=15"`
 	CurrentCityId *int   `json:"current_city_id"`
 }
 
 type UpdateCityPayload struct {
-	CabId         int `json:"cab_id"`
-	CurrentCityId int `json:"current_city_id"`
+	CabId         int `json:"cab_id" validate:"required"`
+	CurrentCityId int `json:"current_city_id" validate:"required"`
 }

@@ -126,13 +126,6 @@ func (c *Controller) GetCityWiseRideInsight(ctx context.Context) (map[string][]R
 	return res, nil
 }
 
-type RideInsight struct {
-	Hours              string `json:"hours"`
-	TotalRequests      int    `json:"total_requests"`
-	FulfilledRequest   int    `json:"fulfilled_requests"`
-	UnfulfilledRequest int    `json:"unfulfilled_requests"`
-}
-
 func (c *Controller) CreateCabRequestEntry(ctx context.Context, cityId int, state string) {
 	object := models.RideRequest{
 		StartCityId:  cityId,
@@ -144,10 +137,17 @@ func (c *Controller) CreateCabRequestEntry(ctx context.Context, cityId int, stat
 	}
 }
 
+type RideInsight struct {
+	Hours              string `json:"hours"`
+	TotalRequests      int    `json:"total_requests"`
+	FulfilledRequest   int    `json:"fulfilled_requests"`
+	UnfulfilledRequest int    `json:"unfulfilled_requests"`
+}
+
 type BookCabPayload struct {
-	CityId int `json:"city_id"`
+	CityId int `json:"city_id" validate:"required"`
 }
 
 type FinishRidePayload struct {
-	RideId int `json:"ride_id"`
+	RideId int `json:"ride_id" validate:"required"`
 }
