@@ -7,7 +7,7 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-func (s *Services) CreateCab(ctx context.Context, cab *models.Cab) error {
+func (s *Service) CreateCab(ctx context.Context, cab *models.Cab) error {
 	_, err := s.Sequel.NamedExecContext(
 		ctx,
 		`INSERT INTO `+models.CabsTableName+
@@ -18,7 +18,7 @@ func (s *Services) CreateCab(ctx context.Context, cab *models.Cab) error {
 	return err
 }
 
-func (s *Services) GetCab(ctx context.Context, id int) (*models.Cab, error) {
+func (s *Service) GetCab(ctx context.Context, id int) (*models.Cab, error) {
 	cab := models.Cab{}
 	err := s.Sequel.GetContext(ctx, &cab, "SELECT * FROM "+
 		models.CabsTableName+
@@ -29,7 +29,7 @@ func (s *Services) GetCab(ctx context.Context, id int) (*models.Cab, error) {
 	return &cab, nil
 }
 
-func (s *Services) GetCabActivities(ctx context.Context, id int) ([]models.CabAudit, error) {
+func (s *Service) GetCabActivities(ctx context.Context, id int) ([]models.CabAudit, error) {
 	var cabActivities []models.CabAudit
 	err := s.Sequel.SelectContext(ctx, &cabActivities, "SELECT * FROM "+
 		models.CabsAuditTableName+
@@ -43,7 +43,7 @@ func (s *Services) GetCabActivities(ctx context.Context, id int) ([]models.CabAu
 	return cabActivities, nil
 }
 
-func (s *Services) GetCabForUpdate(ctx context.Context, id int, tx *sqlx.Tx) (*models.Cab, error) {
+func (s *Service) GetCabForUpdate(ctx context.Context, id int, tx *sqlx.Tx) (*models.Cab, error) {
 	cab := models.Cab{}
 	err := tx.GetContext(ctx, &cab, "SELECT * FROM "+
 		models.CabsTableName+
@@ -54,7 +54,7 @@ func (s *Services) GetCabForUpdate(ctx context.Context, id int, tx *sqlx.Tx) (*m
 	return &cab, nil
 }
 
-func (s *Services) GetMostIdleCabOfCity(ctx context.Context, cityId int, tx *sqlx.Tx) ([]models.Cab, error) {
+func (s *Service) GetMostIdleCabOfCity(ctx context.Context, cityId int, tx *sqlx.Tx) ([]models.Cab, error) {
 	var cab []models.Cab
 	err := tx.SelectContext(ctx, &cab,
 		"SELECT id, cab_number, current_state, current_city_id"+
@@ -64,16 +64,16 @@ func (s *Services) GetMostIdleCabOfCity(ctx context.Context, cityId int, tx *sql
 			"WHERE is_active = 1 AND current_city_id = ? "+
 			"AND current_state = ? "+
 			"ORDER BY last_ride_end_time "+
-			"LIMIT 1 FOR UPDATE",  cityId, models.CabIdleState)
+			"LIMIT 1 FOR UPDATE", cityId, models.CabIdleState)
 	if err != nil {
 		return nil, err
 	}
 	return cab, nil
 }
 
-func (s *Services) UpdateCabCity(ctx context.Context, cab *models.Cab, tx *sqlx.Tx) error {
-	query := "UPDATE "+models.CabsTableName+" "+
-		"SET current_city_id=:current_city_id "+
+func (s *Service) UpdateCabCity(ctx context.Context, cab *models.Cab, tx *sqlx.Tx) error {
+	query := "UPDATE " + models.CabsTableName + " " +
+		"SET current_city_id=:current_city_id " +
 		"WHERE id=:id"
 	var err error
 	if tx != nil {
@@ -88,10 +88,10 @@ func (s *Services) UpdateCabCity(ctx context.Context, cab *models.Cab, tx *sqlx.
 	return err
 }
 
-func (s *Services) UpdateCabState(ctx context.Context, cab *models.Cab, tx *sqlx.Tx) error {
+func (s *Service) UpdateCabState(ctx context.Context, cab *models.Cab, tx *sqlx.Tx) error {
 	res, err := tx.NamedExecContext(
 		ctx,
-		"UPDATE "+models.CabsTableName+ " "+
+		"UPDATE "+models.CabsTableName+" "+
 			"SET current_state=:current_state, "+
 			"current_city_id=:current_city_id "+
 			"WHERE id=:id",
@@ -109,10 +109,10 @@ func (s *Services) UpdateCabState(ctx context.Context, cab *models.Cab, tx *sqlx
 	return err
 }
 
-func (s *Services) UpdateCab(ctx context.Context, cab *models.Cab, tx *sqlx.Tx) error {
+func (s *Service) UpdateCab(ctx context.Context, cab *models.Cab, tx *sqlx.Tx) error {
 	res, err := tx.NamedExecContext(
 		ctx,
-		"UPDATE "+models.CabsTableName+ " "+
+		"UPDATE "+models.CabsTableName+" "+
 			"SET current_state=:current_state, "+
 			"cab_number=:cab_number, current_city_id=:current_city_id, "+
 			"is_active=:is_active, last_ride_end_time=:last_ride_end_time "+
@@ -129,4 +129,28 @@ func (s *Services) UpdateCab(ctx context.Context, cab *models.Cab, tx *sqlx.Tx) 
 		}
 	}
 	return err
+}
+
+func (s *Service) UpdateCabCityTxn(ctx context.Context, CabId int, CurrentCityId int) error {
+	tx := s.Sequel.MustBegin()
+	cab, err := s.GetCabForUpdate(ctx, CabId, tx)
+	if err != nil {
+		_ = tx.Rollback()
+		return err
+	}
+	if cab.CurrentState == models.CabOnTripState {
+		_ = tx.Rollback()
+		return errors.New("cab is on trip state, finish the ride before you change the city")
+	}
+	cab.CurrentCityId = &CurrentCityId
+	err = s.UpdateCabCity(ctx, cab, tx)
+	if err != nil {
+		_ = tx.Rollback()
+		return err
+	}
+	err = tx.Commit()
+	if err != nil {
+		return err
+	}
+	return nil
 }

@@ -7,6 +7,10 @@ import (
 )
 
 func (c *Controller) CreateCab(ctx context.Context, payload *CreateCabPayload) error {
+	err := c.validator.Struct(payload)
+	if err != nil {
+		return err
+	}
 	cab := models.Cab{
 		CabNumber:     payload.CabNumber,
 		CurrentState:  models.CabIdleState,
@@ -17,24 +21,18 @@ func (c *Controller) CreateCab(ctx context.Context, payload *CreateCabPayload) e
 }
 
 func (c *Controller) UpdateCabCity(ctx context.Context, payload *UpdateCityPayload) error {
-	tx := c.services.Sequel.MustBegin()
-	cab, err := c.services.GetCabForUpdate(ctx, payload.CabId, tx)
+	err := c.validator.Struct(payload)
 	if err != nil {
-		_ = tx.Rollback()
+		return err
+	}
+	cab, err := c.services.GetCab(ctx, payload.CabId)
+	if err != nil {
 		return err
 	}
 	if cab.CurrentState == models.CabOnTripState {
-		_ = tx.Rollback()
 		return errors.New("cab is on trip state, finish the ride before you change the city")
 	}
-	cab.CurrentCityId = &payload.CurrentCityId
-	err = c.services.UpdateCabCity(ctx, cab, tx)
-	if err != nil {
-		_ = tx.Rollback()
-		return err
-	}
-	_ = tx.Commit()
-	return nil
+	return c.services.UpdateCabCityTxn(ctx, payload.CabId, payload.CurrentCityId)
 }
 
 func (c *Controller) GetCabActivities(ctx context.Context, cabId int) ([]models.CabAudit, error) {

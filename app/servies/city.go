@@ -5,7 +5,7 @@ import (
 	"context"
 )
 
-func (s *Services) CreateCity(ctx context.Context, city *models.City) error {
+func (s *Service) CreateCity(ctx context.Context, city *models.City) error {
 	_, err := s.Sequel.NamedExecContext(
 		ctx,
 		`INSERT INTO `+models.CitiesTableName+
@@ -16,7 +16,7 @@ func (s *Services) CreateCity(ctx context.Context, city *models.City) error {
 	return err
 }
 
-func (s *Services) GetCity(ctx context.Context, id int) (*models.City, error) {
+func (s *Service) GetCity(ctx context.Context, id int) (*models.City, error) {
 	city := models.City{}
 	err := s.Sequel.GetContext(ctx, &city, "SELECT * FROM " +
 		models.CitiesTableName +

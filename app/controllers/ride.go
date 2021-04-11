@@ -4,11 +4,14 @@ import (
 	"cab-management-portal/app/models"
 	"context"
 	"errors"
-	"time"
 )
 
 // returns error or booked cab object
 func (c *Controller) BookCab(ctx context.Context, payload *BookCabPayload) (error, *models.Cab, *models.Ride) {
+	err := c.validator.Struct(payload)
+	if err != nil {
+		return err, nil, nil
+	}
 	city, err := c.services.GetCity(ctx, payload.CityId)
 	if err != nil {
 		return err, nil, nil
@@ -16,36 +19,9 @@ func (c *Controller) BookCab(ctx context.Context, payload *BookCabPayload) (erro
 	if city.IsActive != 1 {
 		return errors.New("this city is not active for cab booking currently"), nil, nil
 	}
-	tx := c.services.Sequel.MustBegin()
-	var cab *models.Cab = nil
-	var ride *models.Ride = nil
-	cabs, err := c.services.GetMostIdleCabOfCity(ctx, city.Id, tx)
+	cab, ride, err := c.services.BookCabTxn(ctx, payload.CityId)
 	if err != nil {
-		_ = tx.Rollback()
 		return err, nil, nil
-	}
-	if cabs!= nil && len(cabs) >= 0 {
-		cab = &cabs[0]
-		ride = &models.Ride{
-			CabId:         cab.Id,
-			StartCityId:   payload.CityId,
-			CurrentState:  models.InProgressRideStatus,
-		}
-		err = c.services.CreateRide(ctx, ride, tx)
-		if err != nil {
-			_ = tx.Rollback()
-			return err, nil, nil
-		}
-		cab.CurrentState = models.CabOnTripState
-		cab.CurrentCityId = nil
-		err = c.services.UpdateCabState(ctx, cab, tx)
-		if err != nil {
-			_ = tx.Rollback()
-			return err, nil, nil
-		}
-		_ = tx.Commit()
-	} else {
-		_ = tx.Rollback()
 	}
 	if cab == nil {
 		go c.CreateCabRequestEntry(context.Background(), payload.CityId, models.UnFulfilledRequestRideStatus)
@@ -57,42 +33,11 @@ func (c *Controller) BookCab(ctx context.Context, payload *BookCabPayload) (erro
 }
 
 func (c *Controller) FinishRide(ctx context.Context, payload *FinishRidePayload) error {
-	tx := c.services.Sequel.MustBegin()
-	now := time.Now()
-	ride, err := c.services.GetRideForUpdate(ctx, payload.RideId, tx)
+	err := c.validator.Struct(payload)
 	if err != nil {
-		_ = tx.Rollback()
 		return err
 	}
-	if ride.CurrentState != models.InProgressRideStatus {
-		_ = tx.Rollback()
-		return errors.New("this ride is not in progress anymore")
-	}
-	cab, err := c.services.GetCabForUpdate(ctx, ride.CabId, tx)
-	if err != nil {
-		_ = tx.Rollback()
-		return err
-	}
-	if cab.CurrentState != models.CabOnTripState {
-		_ = tx.Rollback()
-		return errors.New("cab is not in trip state")
-	}
-	ride.CurrentState = models.FinishedRideStatus
-	ride.EndTime = &now
-	err = c.services.UpdateRide(ctx, ride, tx)
-	if err != nil {
-		_ = tx.Rollback()
-		return err
-	}
-	cab.CurrentState = models.CabIdleState
-	cab.LastRideEndTime = &now
-	err = c.services.UpdateCab(ctx, cab, tx)
-	if err != nil {
-		_ = tx.Rollback()
-		return err
-	}
-	_ = tx.Commit()
-	return nil
+	return c.services.FinishRide(ctx, payload.RideId)
 }
 
 func (c *Controller) GetCityWiseRideInsight(ctx context.Context) (map[string][]RideInsight, error) {

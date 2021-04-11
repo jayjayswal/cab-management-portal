@@ -6,6 +6,10 @@ import (
 )
 
 func (c *Controller) CreateCity(ctx context.Context, payload *CreateCityPayload) error {
+	err := c.validator.Struct(payload)
+	if err != nil {
+		return err
+	}
 	city := models.City{
 		Name:          payload.Name,
 		IsActive:      1,
