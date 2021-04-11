@@ -4,40 +4,63 @@ import (
 	"cab-management-portal/app/models"
 	"context"
 	"errors"
+	"time"
 )
 
 // returns error or booked cab object
-func (c *Controller) BookCab(ctx context.Context, payload *BookCabPayload) (error, *models.Cab, *models.Ride) {
+func (c *Controller) BookCab(ctx context.Context, payload *BookCabPayload) (*CabBooking, error) {
 	err := c.validator.Struct(payload)
 	if err != nil {
-		return err, nil, nil
+		return nil, err
 	}
 	city, err := c.services.GetCity(ctx, payload.CityId)
 	if err != nil {
-		return err, nil, nil
+		return nil, err
 	}
 	if city.IsActive != 1 {
-		return errors.New("this city is not active for cab booking currently"), nil, nil
+		return nil, errors.New("this city is not active for cab booking currently")
 	}
 	cab, ride, err := c.services.BookCabTxn(ctx, payload.CityId)
 	if err != nil {
-		return err, nil, nil
+		return nil, err
 	}
 	if cab == nil {
 		go c.CreateCabRequestEntry(context.Background(), payload.CityId, models.UnFulfilledRequestRideStatus)
-		return errors.New("no cabs found"), nil, nil
+		return nil, errors.New("no cabs found")
 	} else {
 		go c.CreateCabRequestEntry(context.Background(), payload.CityId, models.FulfilledRequestRideStatus)
-		return nil, cab, ride
+		return &CabBooking{
+			Message:      "Cab booked successfully",
+			RideId:       ride.Id,
+			CabId:        cab.Id,
+			CabNo:        cab.CabNumber,
+			StartCityId:  ride.StartCityId,
+			StartTime:    ride.StartTime,
+			EndTime:      ride.EndTime,
+			CurrentState: ride.CurrentState,
+		}, nil
 	}
 }
 
-func (c *Controller) FinishRide(ctx context.Context, payload *FinishRidePayload) error {
+func (c *Controller) FinishRide(ctx context.Context, payload *FinishRidePayload) (*CabBooking, error) {
 	err := c.validator.Struct(payload)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return c.services.FinishRide(ctx, payload.RideId)
+	cab, ride, err := c.services.FinishRideTxn(ctx, payload.RideId)
+	if err != nil {
+		return nil, err
+	}
+	return &CabBooking{
+		Message:      "Ride finished successfully",
+		RideId:       ride.Id,
+		CabId:        ride.CabId,
+		CabNo:        cab.CabNumber,
+		StartCityId:  ride.StartCityId,
+		StartTime:    ride.StartTime,
+		EndTime:      ride.EndTime,
+		CurrentState: ride.CurrentState,
+	}, nil
 }
 
 func (c *Controller) GetCityWiseRideInsight(ctx context.Context) (map[string][]RideInsight, error) {
@@ -45,9 +68,9 @@ func (c *Controller) GetCityWiseRideInsight(ctx context.Context) (map[string][]R
 	if err != nil {
 		return nil, err
 	}
-	hoursMap := []string{"00:00AM to 04:00AM","04:00AM to 08:00AM","08:00AM to 12:00PM","12:00PM to 04:00PM","04:00PM to 08:00PM","08:00PM to 00:00AM"}
+	hoursMap := []string{"00:00AM to 04:00AM", "04:00AM to 08:00AM", "08:00AM to 12:00PM", "12:00PM to 04:00PM", "04:00PM to 08:00PM", "08:00PM to 00:00AM"}
 	res := make(map[string][]RideInsight)
-	for _, ins :=  range insights {
+	for _, ins := range insights {
 		insArr, ok := res[ins.CityName]
 		if !ok {
 			insArr = []RideInsight{}
@@ -89,6 +112,17 @@ type RideInsight struct {
 	TotalRequests      int    `json:"total_requests"`
 	FulfilledRequest   int    `json:"fulfilled_requests"`
 	UnfulfilledRequest int    `json:"unfulfilled_requests"`
+}
+
+type CabBooking struct {
+	Message      string     `json:"message"`
+	RideId       int        `json:"ride_id"`
+	CabId        int        `json:"cab_id"`
+	CabNo        string     `json:"cab_number"`
+	StartCityId  int        `json:"start_city_id"`
+	StartTime    time.Time  `json:"start_time"`
+	EndTime      *time.Time `json:"end_time"`
+	CurrentState string     `json:"current_state"`
 }
 
 type BookCabPayload struct {

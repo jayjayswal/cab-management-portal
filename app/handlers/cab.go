@@ -25,7 +25,7 @@ func (h *Handler) CreateCab(writer http.ResponseWriter, request *http.Request) {
 		_ = h.Write500ErrorResponse(writer, err)
 		return
 	}
-	_ = h.WriteJSONResponse(writer, `{"message":"created"}`, http.StatusOK)
+	_ = h.WriteJSONResponse(writer, `{"message":"cab created"}`, http.StatusOK)
 }
 
 func (h *Handler) GetAllCabs(writer http.ResponseWriter, request *http.Request) {
@@ -59,7 +59,7 @@ func (h *Handler) UpdateCity(writer http.ResponseWriter, request *http.Request) 
 		_ = h.Write500ErrorResponse(writer, err)
 		return
 	}
-	_ = h.WriteJSONResponse(writer, `{"message":"updated"}`, http.StatusOK)
+	_ = h.WriteJSONResponse(writer, `{"message":"cab updated"}`, http.StatusOK)
 }
 
 func (h *Handler) GetCabActivities(writer http.ResponseWriter, request *http.Request) {

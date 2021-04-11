@@ -60,10 +60,9 @@ func (s *Service) CreateRide(ctx context.Context, ride *models.Ride, tx *sqlx.Tx
 	if err == nil {
 		id, err := res.LastInsertId()
 		if err != nil {
-			ride.Id = int(id)
-		} else {
 			return err
 		}
+		ride.Id = int(id)
 	}
 	return err
 }
@@ -129,21 +128,21 @@ func (s *Service) GetCityWiseRideInsight(ctx context.Context) ([]RideInsight, er
 	return rideInsights, nil
 }
 
-func (s *Service) BookCabTxn(ctx context.Context, cityId int) (*models.Cab, *models.Ride, error)  {
+func (s *Service) BookCabTxn(ctx context.Context, cityId int) (*models.Cab, *models.Ride, error) {
 	tx := s.Sequel.MustBegin()
 	var cab *models.Cab = nil
 	var ride *models.Ride = nil
 	cabs, err := s.GetMostIdleCabOfCity(ctx, cityId, tx)
 	if err != nil {
 		_ = tx.Rollback()
-		return  nil, nil, err
+		return nil, nil, err
 	}
-	if cabs!= nil && len(cabs) >= 0 {
+	if cabs != nil && len(cabs) >= 0 {
 		cab = &cabs[0]
 		ride = &models.Ride{
-			CabId:         cab.Id,
-			StartCityId:   cityId,
-			CurrentState:  models.InProgressRideStatus,
+			CabId:        cab.Id,
+			StartCityId:  cityId,
+			CurrentState: models.InProgressRideStatus,
 		}
 		err = s.CreateRide(ctx, ride, tx)
 		if err != nil {
@@ -164,42 +163,47 @@ func (s *Service) BookCabTxn(ctx context.Context, cityId int) (*models.Cab, *mod
 	return cab, ride, nil
 }
 
-func (s *Service) FinishRide(ctx context.Context, rideId int) error  {
+func (s *Service) FinishRideTxn(ctx context.Context, rideId int) (*models.Cab, *models.Ride, error) {
 	tx := s.Sequel.MustBegin()
 	now := time.Now()
 	ride, err := s.GetRideForUpdate(ctx, rideId, tx)
 	if err != nil {
 		_ = tx.Rollback()
-		return err
+		return nil, nil, err
 	}
 	if ride.CurrentState != models.InProgressRideStatus {
 		_ = tx.Rollback()
-		return errors.New("this ride is not in progress anymore")
+		return nil, nil, errors.New("this ride is not in progress anymore")
 	}
 	cab, err := s.GetCabForUpdate(ctx, ride.CabId, tx)
 	if err != nil {
 		_ = tx.Rollback()
-		return err
+		return nil, nil, err
 	}
 	if cab.CurrentState != models.CabOnTripState {
 		_ = tx.Rollback()
-		return errors.New("cab is not in trip state")
+		return nil, nil, errors.New("cab is not in trip state")
 	}
 	ride.CurrentState = models.FinishedRideStatus
 	ride.EndTime = &now
 	err = s.UpdateRide(ctx, ride, tx)
 	if err != nil {
 		_ = tx.Rollback()
-		return err
+		return nil, nil, err
 	}
 	cab.CurrentState = models.CabIdleState
 	cab.LastRideEndTime = &now
 	err = s.UpdateCab(ctx, cab, tx)
 	if err != nil {
 		_ = tx.Rollback()
-		return err
+		return nil, nil, err
 	}
-	return tx.Commit()
+	err = tx.Commit()
+	if err != nil {
+		_ = tx.Rollback()
+		return nil, nil, err
+	}
+	return cab, ride, nil
 }
 
 type RideInsight struct {

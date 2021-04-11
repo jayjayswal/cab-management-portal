@@ -23,7 +23,7 @@ func (h *Handler) CreateCity(writer http.ResponseWriter, request *http.Request) 
 		_ = h.Write500ErrorResponse(writer, err)
 		return
 	}
-	_ = h.WriteJSONResponse(writer, `{"message":"created"}`, http.StatusOK)
+	_ = h.WriteJSONResponse(writer, `{"message":"city created"}`, http.StatusOK)
 }
 
 func (h *Handler) GetAllCities(writer http.ResponseWriter, request *http.Request) {

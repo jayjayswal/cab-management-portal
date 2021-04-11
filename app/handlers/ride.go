@@ -17,13 +17,19 @@ func (h *Handler) RequestRide(writer http.ResponseWriter, request *http.Request)
 		_ = h.Write500ErrorResponse(writer, err)
 		return
 	}
-	err, _, _ = h.controller.BookCab(context.Background(), &obj)
+	booking, err := h.controller.BookCab(context.Background(), &obj)
 	if err != nil {
 		h.logger.Print(err.Error())
 		_ = h.Write500ErrorResponse(writer, err)
 		return
 	}
-	_ = h.WriteJSONResponse(writer, `{"message":"Cab Booked"}`, http.StatusOK)
+	res, err := json.Marshal(booking)
+	if err != nil {
+		h.logger.Print(err.Error())
+		_ = h.Write500ErrorResponse(writer, err)
+		return
+	}
+	_ = h.WriteJSONResponse(writer, string(res), http.StatusOK)
 }
 
 func (h *Handler) FinishRide(writer http.ResponseWriter, request *http.Request) {
@@ -35,13 +41,19 @@ func (h *Handler) FinishRide(writer http.ResponseWriter, request *http.Request) 
 		_ = h.Write500ErrorResponse(writer, err)
 		return
 	}
-	err = h.controller.FinishRide(context.Background(), &obj)
+	booking, err := h.controller.FinishRide(context.Background(), &obj)
 	if err != nil {
 		h.logger.Print(err.Error())
 		_ = h.Write500ErrorResponse(writer, err)
 		return
 	}
-	_ = h.WriteJSONResponse(writer, `{"message":"Ride Finished"}`, http.StatusOK)
+	res, err := json.Marshal(booking)
+	if err != nil {
+		h.logger.Print(err.Error())
+		_ = h.Write500ErrorResponse(writer, err)
+		return
+	}
+	_ = h.WriteJSONResponse(writer, string(res), http.StatusOK)
 }
 
 func (h *Handler) GetCityWiseRideInsight(writer http.ResponseWriter, request *http.Request) {

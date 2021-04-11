@@ -60,6 +60,6 @@ type Services interface {
 	CreateRideRequest(ctx context.Context, rideRequest *models.RideRequest) error
 	GetCityWiseRideInsight(ctx context.Context) ([]RideInsight, error)
 	BookCabTxn(ctx context.Context, cityId int) (*models.Cab, *models.Ride, error)
-	FinishRide(ctx context.Context, rideId int) error
+	FinishRideTxn(ctx context.Context, rideId int) (*models.Cab, *models.Ride, error)
 	GetAllRides(ctx context.Context) ([]models.Ride, error)
 }
