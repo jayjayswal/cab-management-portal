@@ -33,24 +33,21 @@ func Init(dependencies *utilEntities.Dependencies) *mux.Router {
 
 	cityRouter := apiRouter.PathPrefix("/city").Subrouter()
 	cityRouter.HandleFunc("/create", handler.CreateCity).Methods(http.MethodPost)
-	//articlesRouter.HandleFunc("/all", handler.GetAllCities).Methods(http.MethodGet)
+	cityRouter.HandleFunc("/all", handler.GetAllCities).Methods(http.MethodGet)
 	//articlesRouter.HandleFunc("/{articlesId}", handler.GetCity).Methods(http.MethodGet)
-	//articlesRouter.HandleFunc("/update", handler.UpdateCity).Methods(http.MethodPut)
-	//articlesRouter.HandleFunc("/{articlesId}", handler.DeleteCity).Methods(http.MethodDelete)
 
 	cabRouter := apiRouter.PathPrefix("/cab").Subrouter()
 	cabRouter.HandleFunc("/create", handler.CreateCab).Methods(http.MethodPost)
 	cabRouter.HandleFunc("/update-city", handler.UpdateCity).Methods(http.MethodPut)
 	cabRouter.HandleFunc("/recent-activities/{cabId}", handler.GetCabActivities).Methods(http.MethodGet)
-	//articlesRouter.HandleFunc("/all", handler.GetAllCities).Methods(http.MethodGet)
+	cabRouter.HandleFunc("/all", handler.GetAllCabs).Methods(http.MethodGet)
 	//articlesRouter.HandleFunc("/{articlesId}", handler.GetCity).Methods(http.MethodGet)
-	//articlesRouter.HandleFunc("/update", handler.UpdateCity).Methods(http.MethodPut)
-	//articlesRouter.HandleFunc("/{articlesId}", handler.DeleteCity).Methods(http.MethodDelete)
 
 	rideRouter := apiRouter.PathPrefix("/ride").Subrouter()
 	rideRouter.HandleFunc("/request-new-ride", handler.RequestRide).Methods(http.MethodPost)
 	rideRouter.HandleFunc("/finish-ride", handler.FinishRide).Methods(http.MethodPost)
 	rideRouter.HandleFunc("/insights", handler.GetCityWiseRideInsight).Methods(http.MethodGet)
+	rideRouter.HandleFunc("/all", handler.GetAllRides).Methods(http.MethodGet)
 
 	return dependencies.Router
 }

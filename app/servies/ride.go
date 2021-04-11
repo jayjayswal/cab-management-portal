@@ -21,6 +21,19 @@ func (s *Service) GetRide(ctx context.Context, id int) (*models.Ride, error) {
 	return &ride, nil
 }
 
+func (s *Service) GetAllRides(ctx context.Context) ([]models.Ride, error) {
+	var rides []models.Ride
+	err := s.Sequel.SelectContext(ctx, &rides, "SELECT * FROM "+
+		models.RidesTableName)
+	if err != nil {
+		return nil, err
+	}
+	if rides == nil {
+		rides = []models.Ride{}
+	}
+	return rides, nil
+}
+
 func (s *Service) GetRideForUpdate(ctx context.Context, id int, tx *sqlx.Tx) (*models.Ride, error) {
 	ride := models.Ride{}
 	query := "SELECT * FROM " +

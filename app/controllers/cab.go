@@ -39,6 +39,10 @@ func (c *Controller) GetCabActivities(ctx context.Context, cabId int) ([]models.
 	return c.services.GetCabActivities(ctx, cabId)
 }
 
+func (c *Controller) GetAllCabs(ctx context.Context) ([]models.Cab, error) {
+	return c.services.GetAllCabs(ctx)
+}
+
 type CreateCabPayload struct {
 	CabNumber     string `json:"cab_number" validate:"required,min=6,max=15"`
 	CurrentCityId *int   `json:"current_city_id"`

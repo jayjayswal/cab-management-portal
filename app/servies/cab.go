@@ -29,6 +29,19 @@ func (s *Service) GetCab(ctx context.Context, id int) (*models.Cab, error) {
 	return &cab, nil
 }
 
+func (s *Service) GetAllCabs(ctx context.Context) ([]models.Cab, error) {
+	var cabs []models.Cab
+	err := s.Sequel.SelectContext(ctx, &cabs, "SELECT * FROM "+
+		models.CabsTableName)
+	if err != nil {
+		return nil, err
+	}
+	if cabs == nil {
+		cabs = []models.Cab{}
+	}
+	return cabs, nil
+}
+
 func (s *Service) GetCabActivities(ctx context.Context, id int) ([]models.CabAudit, error) {
 	var cabActivities []models.CabAudit
 	err := s.Sequel.SelectContext(ctx, &cabActivities, "SELECT * FROM "+

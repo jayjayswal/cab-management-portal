@@ -28,6 +28,22 @@ func (h *Handler) CreateCab(writer http.ResponseWriter, request *http.Request) {
 	_ = h.WriteJSONResponse(writer, `{"message":"created"}`, http.StatusOK)
 }
 
+func (h *Handler) GetAllCabs(writer http.ResponseWriter, request *http.Request) {
+	cabs, err := h.controller.GetAllCabs(context.Background())
+	if err != nil {
+		h.logger.Print(err.Error())
+		_ = h.Write500ErrorResponse(writer, err)
+		return
+	}
+	res, err := json.Marshal(cabs)
+	if err != nil {
+		h.logger.Print(err.Error())
+		_ = h.Write500ErrorResponse(writer, err)
+		return
+	}
+	_ = h.WriteJSONResponse(writer, string(res), http.StatusOK)
+}
+
 func (h *Handler) UpdateCity(writer http.ResponseWriter, request *http.Request) {
 	reqBody, _ := ioutil.ReadAll(request.Body)
 	var obj controllers.UpdateCityPayload

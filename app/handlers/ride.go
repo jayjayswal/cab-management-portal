@@ -43,6 +43,7 @@ func (h *Handler) FinishRide(writer http.ResponseWriter, request *http.Request) 
 	}
 	_ = h.WriteJSONResponse(writer, `{"message":"Ride Finished"}`, http.StatusOK)
 }
+
 func (h *Handler) GetCityWiseRideInsight(writer http.ResponseWriter, request *http.Request) {
 	insights, err := h.controller.GetCityWiseRideInsight(context.Background())
 	if err != nil {
@@ -51,6 +52,22 @@ func (h *Handler) GetCityWiseRideInsight(writer http.ResponseWriter, request *ht
 		return
 	}
 	res, err := json.Marshal(insights)
+	if err != nil {
+		h.logger.Print(err.Error())
+		_ = h.Write500ErrorResponse(writer, err)
+		return
+	}
+	_ = h.WriteJSONResponse(writer, string(res), http.StatusOK)
+}
+
+func (h *Handler) GetAllRides(writer http.ResponseWriter, request *http.Request) {
+	rides, err := h.controller.GetAllRides(context.Background())
+	if err != nil {
+		h.logger.Print(err.Error())
+		_ = h.Write500ErrorResponse(writer, err)
+		return
+	}
+	res, err := json.Marshal(rides)
 	if err != nil {
 		h.logger.Print(err.Error())
 		_ = h.Write500ErrorResponse(writer, err)

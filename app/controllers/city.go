@@ -17,6 +17,10 @@ func (c *Controller) CreateCity(ctx context.Context, payload *CreateCityPayload)
 	return c.services.CreateCity(ctx, &city)
 }
 
+func (c *Controller) GetAllCities(ctx context.Context) ([]models.City, error) {
+	return c.services.GetAllCities(ctx)
+}
+
 type CreateCityPayload struct {
 	Name string `json:"name" validate:"required,min=2,max=50"`
 }

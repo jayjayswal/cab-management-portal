@@ -109,6 +109,51 @@ func (mr *MockServicesMockRecorder) FinishRide(ctx, rideId interface{}) *gomock.
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FinishRide", reflect.TypeOf((*MockServices)(nil).FinishRide), ctx, rideId)
 }
 
+// GetAllCabs mocks base method.
+func (m *MockServices) GetAllCabs(ctx context.Context) ([]models.Cab, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAllCabs", ctx)
+	ret0, _ := ret[0].([]models.Cab)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAllCabs indicates an expected call of GetAllCabs.
+func (mr *MockServicesMockRecorder) GetAllCabs(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllCabs", reflect.TypeOf((*MockServices)(nil).GetAllCabs), ctx)
+}
+
+// GetAllCities mocks base method.
+func (m *MockServices) GetAllCities(ctx context.Context) ([]models.City, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAllCities", ctx)
+	ret0, _ := ret[0].([]models.City)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAllCities indicates an expected call of GetAllCities.
+func (mr *MockServicesMockRecorder) GetAllCities(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllCities", reflect.TypeOf((*MockServices)(nil).GetAllCities), ctx)
+}
+
+// GetAllRides mocks base method.
+func (m *MockServices) GetAllRides(ctx context.Context) ([]models.Ride, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAllRides", ctx)
+	ret0, _ := ret[0].([]models.Ride)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAllRides indicates an expected call of GetAllRides.
+func (mr *MockServicesMockRecorder) GetAllRides(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllRides", reflect.TypeOf((*MockServices)(nil).GetAllRides), ctx)
+}
+
 // GetCab mocks base method.
 func (m *MockServices) GetCab(ctx context.Context, id int) (*models.Cab, error) {
 	m.ctrl.T.Helper()

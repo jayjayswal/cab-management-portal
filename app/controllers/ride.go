@@ -80,6 +80,10 @@ func (c *Controller) CreateCabRequestEntry(ctx context.Context, cityId int, stat
 	return nil
 }
 
+func (c *Controller) GetAllRides(ctx context.Context) ([]models.Ride, error) {
+	return c.services.GetAllRides(ctx)
+}
+
 type RideInsight struct {
 	Hours              string `json:"hours"`
 	TotalRequests      int    `json:"total_requests"`

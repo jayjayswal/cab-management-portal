@@ -26,3 +26,16 @@ func (s *Service) GetCity(ctx context.Context, id int) (*models.City, error) {
 	}
 	return &city, nil
 }
+
+func (s *Service) GetAllCities(ctx context.Context) ([]models.City, error) {
+	var cities []models.City
+	err := s.Sequel.SelectContext(ctx, &cities, "SELECT * FROM "+
+		models.CitiesTableName)
+	if err != nil {
+		return nil, err
+	}
+	if cities == nil {
+		cities = []models.City{}
+	}
+	return cities, nil
+}
