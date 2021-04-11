@@ -24,8 +24,12 @@ func Init(dependencies *utilEntities.Dependencies) *mux.Router {
 		controller,
 	)
 
+	dependencies.Router.HandleFunc("/health-check",handler.HealthCheck)
+
 	apiRouter := dependencies.Router.PathPrefix("/api").Subrouter()
-	apiRouter.HandleFunc("/",handler.HealthCheck)
+	amw := utilEntities.AuthenticationMiddleware{}
+	amw.Populate()
+	apiRouter.Use(amw.Middleware)
 
 	cityRouter := apiRouter.PathPrefix("/city").Subrouter()
 	cityRouter.HandleFunc("/create", handler.CreateCity).Methods(http.MethodPost)
