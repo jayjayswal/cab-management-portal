@@ -30,11 +30,11 @@ func GetEnvironment(l *log.Logger) *Environment {
 	}
 	tier, isTierPresent := os.LookupEnv(constants.Tier)
 	if !isTierPresent {
-		port = constants.DefaultTier
+		tier = constants.DefaultTier
 	}
 	portInt, err := strconv.Atoi(port)
 	if err != nil {
-		l.Panic("Port in non integer, please give corect port")
+		l.Panic("Port in non integer, please give correct port")
 	}
 
 	return &Environment{
