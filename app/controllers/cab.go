@@ -12,7 +12,6 @@ func (c *Controller) CreateCab(ctx context.Context, payload *CreateCabPayload) e
 		CurrentState:  models.CabIdleState,
 		CurrentCityId: payload.CurrentCityId,
 		IsActive:      1,
-		LastUpdatedBy: 1,
 	}
 	return c.services.CreateCab(ctx, &cab)
 }
@@ -28,7 +27,6 @@ func (c *Controller) UpdateCabCity(ctx context.Context, payload *UpdateCityPaylo
 		_ = tx.Rollback()
 		return errors.New("cab is on trip state, finish the ride before you change the city")
 	}
-	cab.LastUpdatedBy = 1
 	cab.CurrentCityId = &payload.CurrentCityId
 	err = c.services.UpdateCabCity(ctx, cab, tx)
 	if err != nil {

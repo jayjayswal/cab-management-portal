@@ -9,7 +9,6 @@ func (c *Controller) CreateCity(ctx context.Context, payload *CreateCityPayload)
 	city := models.City{
 		Name:          payload.Name,
 		IsActive:      1,
-		LastUpdatedBy: 1,
 	}
 	return c.services.CreateCity(ctx, &city)
 }

@@ -11,8 +11,8 @@ func (s *Services) CreateCab(ctx context.Context, cab *models.Cab) error {
 	_, err := s.Sequel.NamedExecContext(
 		ctx,
 		`INSERT INTO `+models.CabsTableName+
-			` (current_state,current_city_id,is_active,last_updated_by,cab_number) VALUES `+
-			`(:current_state,:current_city_id,:is_active,:last_updated_by,:cab_number)`,
+			` (current_state,current_city_id,is_active,cab_number) VALUES `+
+			`(:current_state,:current_city_id,:is_active,:cab_number)`,
 		cab,
 	)
 	return err
@@ -58,7 +58,7 @@ func (s *Services) GetMostIdleCabOfCity(ctx context.Context, cityId int, tx *sql
 	var cab []models.Cab
 	err := tx.SelectContext(ctx, &cab,
 		"SELECT id, cab_number, current_state, current_city_id"+
-			", is_active, last_updated_by, created, updated"+
+			", is_active, created, updated"+
 			", IFNULL(last_ride_end_time, created) as last_ride_end_time "+
 			"FROM "+models.CabsTableName+" "+
 			"WHERE is_active = 1 AND current_city_id = ? "+
@@ -73,7 +73,7 @@ func (s *Services) GetMostIdleCabOfCity(ctx context.Context, cityId int, tx *sql
 
 func (s *Services) UpdateCabCity(ctx context.Context, cab *models.Cab, tx *sqlx.Tx) error {
 	query := "UPDATE "+models.CabsTableName+" "+
-		"SET current_city_id=:current_city_id, last_updated_by=:last_updated_by "+
+		"SET current_city_id=:current_city_id "+
 		"WHERE id=:id"
 	var err error
 	if tx != nil {
@@ -92,7 +92,7 @@ func (s *Services) UpdateCabState(ctx context.Context, cab *models.Cab, tx *sqlx
 	res, err := tx.NamedExecContext(
 		ctx,
 		"UPDATE "+models.CabsTableName+ " "+
-			"SET current_state=:current_state, last_updated_by=:last_updated_by, "+
+			"SET current_state=:current_state, "+
 			"current_city_id=:current_city_id "+
 			"WHERE id=:id",
 		cab,
@@ -113,7 +113,7 @@ func (s *Services) UpdateCab(ctx context.Context, cab *models.Cab, tx *sqlx.Tx) 
 	res, err := tx.NamedExecContext(
 		ctx,
 		"UPDATE "+models.CabsTableName+ " "+
-			"SET current_state=:current_state, last_updated_by=:last_updated_by, "+
+			"SET current_state=:current_state, "+
 			"cab_number=:cab_number, current_city_id=:current_city_id, "+
 			"is_active=:is_active, last_ride_end_time=:last_ride_end_time "+
 			"WHERE id=:id",

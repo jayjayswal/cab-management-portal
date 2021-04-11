@@ -8,7 +8,6 @@ CREATE TABLE `cabs` (
   `current_state` varchar(10) NOT NULL DEFAULT 'IDLE',
   `current_city_id` int unsigned NOT NULL,
   `is_active` tinyint(1) NOT NULL DEFAULT '1',
-  `last_updated_by` int DEFAULT NULL,
   `created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
@@ -39,7 +38,6 @@ type Cab struct {
 	CurrentState    string     `db:"current_state"`
 	CurrentCityId   *int       `db:"current_city_id"`
 	IsActive        int        `db:"is_active"`
-	LastUpdatedBy   int        `db:"last_updated_by"`
 	LastRideEndTime *time.Time `db:"last_ride_end_time"`
 	Created         time.Time  `db:"created"`
 	Updated         time.Time  `db:"updated"`
@@ -51,7 +49,6 @@ type CabAudit struct {
 	CurrentState    string    `db:"current_state"`
 	CurrentCityId   *int       `db:"current_city_id"`
 	IsActive        int       `db:"is_active"`
-	LastUpdatedBy   int       `db:"last_updated_by"`
 	LastRideEndTime *time.Time `db:"last_ride_end_time"`
 	Created         time.Time `db:"created"`
 	Updated         time.Time `db:"updated"`
@@ -80,7 +77,7 @@ const (
 /**
 FOR EACH ROW
 BEGIN
-  INSERT INTO `cabs_audit` (`id`, `cab_number`, `current_state`, `current_city_id`, `is_active`, `last_updated_by`, `last_ride_end_time`, `audit_added_at`, `created`, `updated`)
-  VALUES(NEW.id, NEW.cab_number, NEW.current_state, NEW.current_city_id, NEW.is_active, NEW.last_updated_by, NEW.last_ride_end_time, NOW(), NEW.created, NEW.updated);
+  INSERT INTO `cabs_audit` (`id`, `cab_number`, `current_state`, `current_city_id`, `is_active`, `last_ride_end_time`, `audit_added_at`, `created`, `updated`)
+  VALUES(NEW.id, NEW.cab_number, NEW.current_state, NEW.current_city_id, NEW.is_active, NEW.last_ride_end_time, NOW(), NEW.created, NEW.updated);
 END;
  */

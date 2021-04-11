@@ -30,7 +30,6 @@ func (c *Controller) BookCab(ctx context.Context, payload *BookCabPayload) (erro
 			CabId:         cab.Id,
 			StartCityId:   payload.CityId,
 			CurrentState:  models.InProgressRideStatus,
-			LastUpdatedBy: 1,
 		}
 		err = c.services.CreateRide(ctx, ride, tx)
 		if err != nil {
@@ -38,7 +37,6 @@ func (c *Controller) BookCab(ctx context.Context, payload *BookCabPayload) (erro
 			return err, nil, nil
 		}
 		cab.CurrentState = models.CabOnTripState
-		cab.LastUpdatedBy = 1
 		cab.CurrentCityId = nil
 		err = c.services.UpdateCabState(ctx, cab, tx)
 		if err != nil {
@@ -80,14 +78,12 @@ func (c *Controller) FinishRide(ctx context.Context, payload *FinishRidePayload)
 		return errors.New("cab is not in trip state")
 	}
 	ride.CurrentState = models.FinishedRideStatus
-	ride.LastUpdatedBy = 1
 	ride.EndTime = &now
 	err = c.services.UpdateRide(ctx, ride, tx)
 	if err != nil {
 		_ = tx.Rollback()
 		return err
 	}
-	cab.LastUpdatedBy = 1
 	cab.CurrentState = models.CabIdleState
 	cab.LastRideEndTime = &now
 	err = c.services.UpdateCab(ctx, cab, tx)

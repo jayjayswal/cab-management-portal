@@ -10,7 +10,6 @@ CREATE TABLE `rides` (
   `start_time` timestamp NOT NULL,
   `end_time` timestamp NULL DEFAULT NULL,
   `current_state` varchar(20) NOT NULL DEFAULT '',
-  `last_updated_by` int DEFAULT NULL,
   `created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
@@ -31,7 +30,6 @@ type Ride struct {
 	StartTime     time.Time  `db:"start_time"`
 	EndTime       *time.Time `db:"end_time"`
 	CurrentState  string     `db:"current_state"`
-	LastUpdatedBy int        `db:"last_updated_by"`
 	Created       time.Time  `db:"created"`
 	Updated       time.Time  `db:"updated"`
 }

@@ -9,8 +9,8 @@ func (s *Services) CreateCity(ctx context.Context, city *models.City) error {
 	_, err := s.Sequel.NamedExecContext(
 		ctx,
 		`INSERT INTO `+models.CitiesTableName+
-			` (name,is_active,last_updated_by) VALUES `+
-			`(:name,:is_active,:last_updated_by)`,
+			` (name,is_active) VALUES `+
+			`(:name,:is_active)`,
 		city,
 	)
 	return err

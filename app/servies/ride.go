@@ -34,8 +34,8 @@ func (s *Services) GetRideForUpdate(ctx context.Context, id int, tx *sqlx.Tx) (*
 
 func (s *Services) CreateRide(ctx context.Context, ride *models.Ride, tx *sqlx.Tx) error {
 	query := `INSERT INTO ` + models.RidesTableName +
-		` (cab_id,start_city_id,current_state,last_updated_by) VALUES ` +
-		`(:cab_id,:start_city_id,:current_state,:last_updated_by)`
+		` (cab_id,start_city_id,current_state) VALUES ` +
+		`(:cab_id,:start_city_id,:current_state)`
 	var err error
 	var res sql.Result
 	if tx != nil {
@@ -59,7 +59,7 @@ func (s *Services) UpdateRide(ctx context.Context, ride *models.Ride, tx *sqlx.T
 		ctx,
 		"UPDATE "+models.RidesTableName+" "+
 			"SET cab_id=:cab_id, start_city_id=:start_city_id, "+
-			"last_updated_by=:last_updated_by, current_state=:current_state, "+
+			"current_state=:current_state, "+
 			"start_time=:start_time, end_time=:end_time "+
 			"WHERE id=:id",
 		ride,
