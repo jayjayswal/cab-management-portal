@@ -24,3 +24,4 @@ https://www.getpostman.com/collectisons/85afb79fc87848529e86
 2. API for how much time was a cab idle in a given duration
 3. Better error handling for DB level and Controller level errors
 4. Unit test cases for all the controllers
+5. On start of server, create DB tables if not already exist

@@ -41,6 +41,8 @@ func GetServiceObject(dependencies *utilEntities.Dependencies) (Services, error)
 }
 
 type Services interface {
+	CreateSchema(ctx context.Context)
+
 	CreateCab(ctx context.Context, cab *models.Cab) error
 	GetCab(ctx context.Context, id int) (*models.Cab, error)
 	GetCabActivities(ctx context.Context, id int) ([]models.CabAudit, error)

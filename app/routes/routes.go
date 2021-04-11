@@ -15,6 +15,7 @@ func Init(dependencies *utilEntities.Dependencies) *mux.Router {
 	if err != nil {
 		dependencies.Logger.Panic(err.Error())
 	}
+	//services.CreateSchema(context.Background())
 	controller := controllers.GetNewController(
 		dependencies,
 		services,
