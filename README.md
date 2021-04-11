@@ -13,3 +13,14 @@ Go 1.12 Required
 ```
 
 ### DB Design
+![DB Design](carBooking.jpeg)
+
+### POSTMAN COLLECTION
+https://www.getpostman.com/collectisons/85afb79fc87848529e86
+
+
+### PENDING IMPROVEMENTS
+1. Implement DB/Cache based admin authentication
+2. API for how much time was a cab idle in a given duration
+3. Better error handling for DB level and Controller level errors
+4. Unit test cases for all the controllers
