@@ -3,6 +3,7 @@ package controllers
 import (
 	"cab-management-portal/app/models"
 	"context"
+	"errors"
 )
 
 func (c *Controller) CreateCab(ctx context.Context, payload *CreateCabPayload) error {
@@ -17,11 +18,25 @@ func (c *Controller) CreateCab(ctx context.Context, payload *CreateCabPayload) e
 }
 
 func (c *Controller) UpdateCabCity(ctx context.Context, payload *UpdateCityPayload) error {
-	cab := models.Cab{
-		Id: payload.CabId,
-		CurrentCityId: &payload.CurrentCityId,
+	tx := c.services.Sequel.MustBegin()
+	cab, err := c.services.GetCabForUpdate(ctx, payload.CabId, tx)
+	if err != nil {
+		_ = tx.Rollback()
+		return err
 	}
-	return c.services.UpdateCabCity(ctx, &cab)
+	if cab.CurrentState == models.CabOnTripState {
+		_ = tx.Rollback()
+		return errors.New("cab is on trip state, finish the ride before you change the city")
+	}
+	cab.LastUpdatedBy = 1
+	cab.CurrentCityId = &payload.CurrentCityId
+	err = c.services.UpdateCabCity(ctx, cab, tx)
+	if err != nil {
+		_ = tx.Rollback()
+		return err
+	}
+	_ = tx.Commit()
+	return nil
 }
 
 type CreateCabPayload struct {

@@ -19,7 +19,7 @@ func GetNewHandler(
 	controller *controllers.Controller,
 ) *Handler {
 	return &Handler{
-		logger: dependencies.Logger,
+		logger:     dependencies.Logger,
 		controller: controller,
 	}
 }
@@ -35,10 +35,13 @@ func (h *Handler) WriteJSONResponse(w http.ResponseWriter, resp string, statusCo
 	return nil
 }
 
-func (h *Handler) Write500ErrorResponse(w http.ResponseWriter) error {
+func (h *Handler) Write500ErrorResponse(w http.ResponseWriter, err error) error {
 	w.Header().Add("Content-Type", "application/json")
 	w.WriteHeader(500)
-	_, writeError := w.Write([]byte(`{"message"":"Something went wrong, Please try again"}`))
+	_, writeError := w.Write([]byte(`{
+		"message":"Something went wrong, Please try again",
+		"error_message": "` + err.Error() + `"
+	}`))
 	if writeError != nil {
 		h.logger.Print(writeError.Error())
 	}

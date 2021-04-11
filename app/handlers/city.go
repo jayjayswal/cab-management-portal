@@ -14,13 +14,13 @@ func (h *Handler) CreateCity(writer http.ResponseWriter, request *http.Request) 
 	err := json.Unmarshal(reqBody, &obj)
 	if err != nil {
 		h.logger.Print(err.Error())
-		_ = h.Write500ErrorResponse(writer)
+		_ = h.Write500ErrorResponse(writer, err)
 		return
 	}
-	err = h.controller.CreateCity(context.Background(),&obj)
+	err = h.controller.CreateCity(context.Background(), &obj)
 	if err != nil {
 		h.logger.Print(err.Error())
-		_ = h.Write500ErrorResponse(writer)
+		_ = h.Write500ErrorResponse(writer, err)
 		return
 	}
 	_ = h.WriteJSONResponse(writer, `{"message":"created"}`, http.StatusOK)

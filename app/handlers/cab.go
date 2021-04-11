@@ -14,13 +14,13 @@ func (h *Handler) CreateCab(writer http.ResponseWriter, request *http.Request) {
 	err := json.Unmarshal(reqBody, &obj)
 	if err != nil {
 		h.logger.Print(err.Error())
-		_ = h.Write500ErrorResponse(writer)
+		_ = h.Write500ErrorResponse(writer, err)
 		return
 	}
-	err = h.controller.CreateCab(context.Background(),&obj)
+	err = h.controller.CreateCab(context.Background(), &obj)
 	if err != nil {
 		h.logger.Print(err.Error())
-		_ = h.Write500ErrorResponse(writer)
+		_ = h.Write500ErrorResponse(writer, err)
 		return
 	}
 	_ = h.WriteJSONResponse(writer, `{"message":"created"}`, http.StatusOK)
@@ -32,13 +32,13 @@ func (h *Handler) UpdateCity(writer http.ResponseWriter, request *http.Request) 
 	err := json.Unmarshal(reqBody, &obj)
 	if err != nil {
 		h.logger.Print(err.Error())
-		_ = h.Write500ErrorResponse(writer)
+		_ = h.Write500ErrorResponse(writer, err)
 		return
 	}
-	err = h.controller.UpdateCabCity(context.Background(),&obj)
+	err = h.controller.UpdateCabCity(context.Background(), &obj)
 	if err != nil {
 		h.logger.Print(err.Error())
-		_ = h.Write500ErrorResponse(writer)
+		_ = h.Write500ErrorResponse(writer, err)
 		return
 	}
 	_ = h.WriteJSONResponse(writer, `{"message":"updated"}`, http.StatusOK)
