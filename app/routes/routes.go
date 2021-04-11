@@ -36,7 +36,8 @@ func Init(dependencies *utilEntities.Dependencies) *mux.Router {
 
 	cabRouter := apiRouter.PathPrefix("/cab").Subrouter()
 	cabRouter.HandleFunc("/create", handler.CreateCab).Methods(http.MethodPost)
-	cabRouter.HandleFunc("/updateCity", handler.UpdateCity).Methods(http.MethodPut)
+	cabRouter.HandleFunc("/update-city", handler.UpdateCity).Methods(http.MethodPut)
+	cabRouter.HandleFunc("/recent-activities/{cabId}", handler.GetCabActivities).Methods(http.MethodGet)
 	//articlesRouter.HandleFunc("/all", handler.GetAllCities).Methods(http.MethodGet)
 	//articlesRouter.HandleFunc("/{articlesId}", handler.GetCity).Methods(http.MethodGet)
 	//articlesRouter.HandleFunc("/update", handler.UpdateCity).Methods(http.MethodPut)
@@ -45,6 +46,7 @@ func Init(dependencies *utilEntities.Dependencies) *mux.Router {
 	rideRouter := apiRouter.PathPrefix("/ride").Subrouter()
 	rideRouter.HandleFunc("/request-new-ride", handler.RequestRide).Methods(http.MethodPost)
 	rideRouter.HandleFunc("/finish-ride", handler.FinishRide).Methods(http.MethodPost)
+	rideRouter.HandleFunc("/insights", handler.GetCityWiseRideInsight).Methods(http.MethodGet)
 
 	return dependencies.Router
 }

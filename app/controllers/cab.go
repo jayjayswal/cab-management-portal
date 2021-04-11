@@ -39,6 +39,10 @@ func (c *Controller) UpdateCabCity(ctx context.Context, payload *UpdateCityPaylo
 	return nil
 }
 
+func (c *Controller) GetCabActivities(ctx context.Context, cabId int) ([]models.CabAudit, error) {
+	return c.services.GetCabActivities(ctx, cabId)
+}
+
 type CreateCabPayload struct {
 	CabNumber     string `json:"cab_number"`
 	CurrentCityId *int   `json:"current_city_id"`

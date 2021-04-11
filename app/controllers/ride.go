@@ -99,6 +99,40 @@ func (c *Controller) FinishRide(ctx context.Context, payload *FinishRidePayload)
 	return nil
 }
 
+func (c *Controller) GetCityWiseRideInsight(ctx context.Context) (map[string][]RideInsight, error) {
+	insights, err := c.services.GetCityWiseRideInsight(ctx)
+	if err != nil {
+		return nil, err
+	}
+	hoursMap := []string{"00:00AM to 04:00AM","04:00AM to 08:00AM","08:00AM to 12:00PM","12:00PM to 04:00PM","04:00PM to 08:00PM","08:00PM to 00:00AM"}
+	res := make(map[string][]RideInsight)
+	for _, ins :=  range insights {
+		insArr, ok := res[ins.CityName]
+		if !ok {
+			insArr = []RideInsight{}
+			res[ins.CityName] = insArr
+		}
+		hour := "UNKNOWN"
+		if len(hoursMap) >= ins.HourGroupId {
+			hour = hoursMap[ins.HourGroupId]
+		}
+		res[ins.CityName] = append(insArr, RideInsight{
+			Hours:              hour,
+			TotalRequests:      ins.TotalRequests,
+			FulfilledRequest:   ins.FulfilledRequest,
+			UnfulfilledRequest: ins.UnfulfilledRequest,
+		})
+	}
+	return res, nil
+}
+
+type RideInsight struct {
+	Hours              string `json:"hours"`
+	TotalRequests      int    `json:"total_requests"`
+	FulfilledRequest   int    `json:"fulfilled_requests"`
+	UnfulfilledRequest int    `json:"unfulfilled_requests"`
+}
+
 func (c *Controller) CreateCabRequestEntry(ctx context.Context, cityId int, state string) {
 	object := models.RideRequest{
 		StartCityId:  cityId,

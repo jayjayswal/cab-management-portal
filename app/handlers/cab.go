@@ -4,8 +4,10 @@ import (
 	"cab-management-portal/app/controllers"
 	"context"
 	"encoding/json"
+	"github.com/gorilla/mux"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 )
 
 func (h *Handler) CreateCab(writer http.ResponseWriter, request *http.Request) {
@@ -42,4 +44,28 @@ func (h *Handler) UpdateCity(writer http.ResponseWriter, request *http.Request) 
 		return
 	}
 	_ = h.WriteJSONResponse(writer, `{"message":"updated"}`, http.StatusOK)
+}
+
+func (h *Handler) GetCabActivities(writer http.ResponseWriter, request *http.Request) {
+	vars := mux.Vars(request)
+	var id = vars["cabId"]
+	idInt, err := strconv.Atoi(id)
+	if err != nil {
+		h.logger.Print(err.Error())
+		_ = h.Write500ErrorResponse(writer, err)
+		return
+	}
+	activities, err := h.controller.GetCabActivities(context.Background(), idInt)
+	if err != nil {
+		h.logger.Print(err.Error())
+		_ = h.Write500ErrorResponse(writer, err)
+		return
+	}
+	res, err := json.Marshal(activities)
+	if err != nil {
+		h.logger.Print(err.Error())
+		_ = h.Write500ErrorResponse(writer, err)
+		return
+	}
+	_ = h.WriteJSONResponse(writer, string(res), http.StatusOK)
 }

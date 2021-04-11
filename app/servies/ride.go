@@ -54,19 +54,18 @@ func (s *Services) CreateRide(ctx context.Context, ride *models.Ride, tx *sqlx.T
 	return err
 }
 
-
 func (s *Services) UpdateRide(ctx context.Context, ride *models.Ride, tx *sqlx.Tx) error {
 	res, err := tx.NamedExecContext(
 		ctx,
 		"UPDATE "+models.RidesTableName+" "+
-			"SET cab_id=:cab_id, start_city_id=:start_city_id, " +
+			"SET cab_id=:cab_id, start_city_id=:start_city_id, "+
 			"last_updated_by=:last_updated_by, current_state=:current_state, "+
 			"start_time=:start_time, end_time=:end_time "+
 			"WHERE id=:id",
 		ride,
 	)
-	if err == nil{
-		totalRows, err :=res.RowsAffected()
+	if err == nil {
+		totalRows, err := res.RowsAffected()
 		if err != nil {
 			return err
 		}
@@ -76,7 +75,6 @@ func (s *Services) UpdateRide(ctx context.Context, ride *models.Ride, tx *sqlx.T
 	}
 	return err
 }
-
 
 func (s *Services) CreateRideRequest(ctx context.Context, rideRequest *models.RideRequest) error {
 	res, err := s.Sequel.NamedExecContext(
@@ -96,3 +94,45 @@ func (s *Services) CreateRideRequest(ctx context.Context, rideRequest *models.Ri
 	}
 	return err
 }
+
+func (s *Services) GetCityWiseRideInsight(ctx context.Context) ([]RideInsight, error) {
+	var rideInsights []RideInsight
+	query := "SELECT c.name, rr.start_city_id, floor(hour(rr.created) / 4) as hourGroupId, count(1) as total_requests, " +
+		"SUM(IF(rr.current_state=\"FULFILLED\", 1, 0)) as fulfilled_requests, " +
+		"SUM(IF(rr.current_state=\"UNFULFILLED\", 1, 0)) as unfulfilled_requests " +
+		"FROM ride_requests as rr LEFT JOIN cities as c ON c.id = rr.start_city_id " +
+		"WHERE rr.created > DATE_SUB(now(), INTERVAL 30 DAY) " +
+		"GROUP BY rr.start_city_id, hourgroupId " +
+		"ORDER BY total_requests DESC " +
+		"LIMIT 100 "
+	err := s.Sequel.SelectContext(ctx, &rideInsights, query)
+	if err != nil {
+		return nil, err
+	}
+	if rideInsights == nil {
+		rideInsights = []RideInsight{}
+	}
+	return rideInsights, nil
+}
+
+type RideInsight struct {
+	CityName           string `db:"name"`
+	StartCityId        int    `db:"start_city_id"`
+	HourGroupId        int    `db:"hourGroupId"`
+	TotalRequests      int    `db:"total_requests"`
+	FulfilledRequest   int    `db:"fulfilled_requests"`
+	UnfulfilledRequest int    `db:"unfulfilled_requests"`
+}
+
+/**
+SELECT c.name, rr.start_city_id,
+floor(hour(rr.created) / 4) as hourGroupId,
+count(1) as total_requests,
+SUM(IF(rr.current_state="FULFILLED", 1, 0)) as fulfilled_requests, SUM(IF(rr.current_state="UNFULFILLED", 1, 0)) as unfulfilled_requests
+FROM ride_requests as rr
+LEFT JOIN cities as c ON c.id = rr.start_city_id
+WHERE rr.created > DATE_SUB(now(), INTERVAL 30 DAY)
+GROUP BY rr.start_city_id, hourGroupId
+ORDER BY total_requests DESC
+LIMIT 100
+*/

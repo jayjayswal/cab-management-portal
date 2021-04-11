@@ -29,6 +29,20 @@ func (s *Services) GetCab(ctx context.Context, id int) (*models.Cab, error) {
 	return &cab, nil
 }
 
+func (s *Services) GetCabActivities(ctx context.Context, id int) ([]models.CabAudit, error) {
+	var cabActivities []models.CabAudit
+	err := s.Sequel.SelectContext(ctx, &cabActivities, "SELECT * FROM "+
+		models.CabsAuditTableName+
+		" WHERE id=? ORDER BY updated DESC LIMIT 100", id)
+	if err != nil {
+		return nil, err
+	}
+	if cabActivities == nil {
+		cabActivities = []models.CabAudit{}
+	}
+	return cabActivities, nil
+}
+
 func (s *Services) GetCabForUpdate(ctx context.Context, id int, tx *sqlx.Tx) (*models.Cab, error) {
 	cab := models.Cab{}
 	err := tx.GetContext(ctx, &cab, "SELECT * FROM "+

@@ -49,10 +49,10 @@ type CabAudit struct {
 	Id              int       `db:"id"`
 	CabNumber       string    `db:"cab_number"`
 	CurrentState    string    `db:"current_state"`
-	CurrentCityId   int       `db:"current_city_id"`
+	CurrentCityId   *int       `db:"current_city_id"`
 	IsActive        int       `db:"is_active"`
 	LastUpdatedBy   int       `db:"last_updated_by"`
-	LastRideEndTime time.Time `db:"last_ride_end_time"`
+	LastRideEndTime *time.Time `db:"last_ride_end_time"`
 	Created         time.Time `db:"created"`
 	Updated         time.Time `db:"updated"`
 	AuditAddedAt    time.Time `db:"audit_added_at"`
@@ -75,3 +75,12 @@ const (
 	CabIdleState              = "IDLE"
 	CabOnTripState            = "ON_TRIP"
 )
+
+
+/**
+FOR EACH ROW
+BEGIN
+  INSERT INTO `cabs_audit` (`id`, `cab_number`, `current_state`, `current_city_id`, `is_active`, `last_updated_by`, `last_ride_end_time`, `audit_added_at`, `created`, `updated`)
+  VALUES(NEW.id, NEW.cab_number, NEW.current_state, NEW.current_city_id, NEW.is_active, NEW.last_updated_by, NEW.last_ride_end_time, NOW(), NEW.created, NEW.updated);
+END;
+ */
