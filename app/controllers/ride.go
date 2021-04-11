@@ -67,7 +67,7 @@ func (c *Controller) GetCityWiseRideInsight(ctx context.Context) (map[string][]R
 	return res, nil
 }
 
-func (c *Controller) CreateCabRequestEntry(ctx context.Context, cityId int, state string) {
+func (c *Controller) CreateCabRequestEntry(ctx context.Context, cityId int, state string) error {
 	object := models.RideRequest{
 		StartCityId:  cityId,
 		CurrentState: state,
@@ -75,7 +75,9 @@ func (c *Controller) CreateCabRequestEntry(ctx context.Context, cityId int, stat
 	err := c.services.CreateRideRequest(ctx, &object)
 	if err != nil {
 		c.logger.Print(err.Error())
+		return err
 	}
+	return nil
 }
 
 type RideInsight struct {
