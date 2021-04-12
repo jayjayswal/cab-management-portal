@@ -7,7 +7,16 @@ import (
 	"time"
 )
 
-// returns error or booked cab object
+// This function books a cab
+//Steps:
+//Get city from DB
+//If city is not active, reject cab booking
+//Start DB Transaction:
+//Get most idle cab in that city from DB
+//If no cab found, Log request in CabRequest table with UNFULFILLED status
+//If cab found, update cab status to ON_TRIP, and create ride entry with IN_PROGRESS status
+//Log request in CabRequest table with FULFILLED status
+//Complete the transaction
 func (c *Controller) BookCab(ctx context.Context, payload *BookCabPayload) (*CabBooking, error) {
 	err := c.validator.Struct(payload)
 	if err != nil {
@@ -42,6 +51,16 @@ func (c *Controller) BookCab(ctx context.Context, payload *BookCabPayload) (*Cab
 	}
 }
 
+//This function finishes ride
+//Steps:
+//Start DB Transaction:
+//Get Ride from DB
+//If ride is not active, reject the request
+//Get Cab from DB
+//If cab is not active, reject the request
+//Get most idle cab in that city from DB
+//Update ride and cab with FINISHED and IDLE state
+//Complete the transaction
 func (c *Controller) FinishRide(ctx context.Context, payload *FinishRidePayload) (*CabBooking, error) {
 	err := c.validator.Struct(payload)
 	if err != nil {
