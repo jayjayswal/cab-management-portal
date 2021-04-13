@@ -60,7 +60,7 @@ type CabIdleDuration struct {
 	CabId         int       `db:"cab_id"`
 	IdleStartTime time.Time `db:"idle_start_time"`
 	IdleEndTime   time.Time `db:"idle_end_time"`
-	TotalDuration float32   `db:"total_duration"`
+	TotalDuration float64   `db:"total_duration"`
 	Created       time.Time `db:"created"`
 	Updated       time.Time `db:"updated"`
 }

@@ -48,8 +48,8 @@ func (s *Service) GetRideForUpdate(ctx context.Context, id int, tx *sqlx.Tx) (*m
 
 func (s *Service) CreateRide(ctx context.Context, ride *models.Ride, tx *sqlx.Tx) error {
 	query := `INSERT INTO ` + models.RidesTableName +
-		` (cab_id,start_city_id,current_state) VALUES ` +
-		`(:cab_id,:start_city_id,:current_state)`
+		` (cab_id,start_city_id,end_city_id,current_state) VALUES ` +
+		`(:cab_id,:start_city_id,:end_city_id,:current_state)`
 	var err error
 	var res sql.Result
 	if tx != nil {
@@ -108,6 +108,25 @@ func (s *Service) CreateRideRequest(ctx context.Context, rideRequest *models.Rid
 	return err
 }
 
+func (s *Service) CreateCabIdleStateEntry(ctx context.Context, cabIdleDuration *models.CabIdleDuration) error {
+	res, err := s.Sequel.NamedExecContext(
+		ctx,
+		`INSERT INTO `+models.CabsIdleDurationTableName+
+			` (cab_id,idle_start_time,idle_end_time,total_duration) VALUES `+
+			`(:cab_id,:idle_start_time,:idle_end_time,:total_duration)`,
+		cabIdleDuration,
+	)
+	if err == nil {
+		id, err := res.LastInsertId()
+		if err != nil {
+			cabIdleDuration.Id = int(id)
+		} else {
+			return err
+		}
+	}
+	return err
+}
+
 func (s *Service) GetCityWiseRideInsight(ctx context.Context) ([]RideInsight, error) {
 	var rideInsights []RideInsight
 	query := "SELECT c.name, rr.start_city_id, floor(hour(rr.created) / 4) as hourGroupId, count(1) as total_requests, " +
@@ -128,11 +147,11 @@ func (s *Service) GetCityWiseRideInsight(ctx context.Context) ([]RideInsight, er
 	return rideInsights, nil
 }
 
-func (s *Service) BookCabTxn(ctx context.Context, cityId int) (*models.Cab, *models.Ride, error) {
+func (s *Service) BookCabTxn(ctx context.Context, startCityId int, endCityId int) (*models.Cab, *models.Ride, error) {
 	tx := s.Sequel.MustBegin()
 	var cab *models.Cab = nil
 	var ride *models.Ride = nil
-	cabs, err := s.GetMostIdleCabOfCity(ctx, cityId, tx)
+	cabs, err := s.GetMostIdleCabOfCity(ctx, startCityId, tx)
 	if err != nil {
 		_ = tx.Rollback()
 		return nil, nil, err
@@ -141,7 +160,8 @@ func (s *Service) BookCabTxn(ctx context.Context, cityId int) (*models.Cab, *mod
 		cab = &cabs[0]
 		ride = &models.Ride{
 			CabId:        cab.Id,
-			StartCityId:  cityId,
+			StartCityId:  startCityId,
+			EndCityId:    endCityId,
 			CurrentState: models.InProgressRideStatus,
 		}
 		err = s.CreateRide(ctx, ride, tx)
@@ -165,7 +185,7 @@ func (s *Service) BookCabTxn(ctx context.Context, cityId int) (*models.Cab, *mod
 
 func (s *Service) FinishRideTxn(ctx context.Context, rideId int) (*models.Cab, *models.Ride, error) {
 	tx := s.Sequel.MustBegin()
-	now := time.Now()
+	now := time.Now().UTC()
 	ride, err := s.GetRideForUpdate(ctx, rideId, tx)
 	if err != nil {
 		_ = tx.Rollback()
@@ -193,6 +213,7 @@ func (s *Service) FinishRideTxn(ctx context.Context, rideId int) (*models.Cab, *
 	}
 	cab.CurrentState = models.CabIdleState
 	cab.LastRideEndTime = &now
+	cab.CurrentCityId = &ride.EndCityId
 	err = s.UpdateCab(ctx, cab, tx)
 	if err != nil {
 		_ = tx.Rollback()

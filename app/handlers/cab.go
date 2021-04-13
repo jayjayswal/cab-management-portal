@@ -85,3 +85,27 @@ func (h *Handler) GetCabActivities(writer http.ResponseWriter, request *http.Req
 	}
 	_ = h.WriteJSONResponse(writer, string(res), http.StatusOK)
 }
+
+func (h *Handler) GetCabIdleTime(writer http.ResponseWriter, request *http.Request) {
+	vars := mux.Vars(request)
+	var id = vars["cabId"]
+	idInt, err := strconv.Atoi(id)
+	if err != nil {
+		h.logger.Print(err.Error())
+		_ = h.Write500ErrorResponse(writer, err)
+		return
+	}
+	idleHours, err := h.controller.GetCabIdleTime(context.Background(), idInt)
+	if err != nil {
+		h.logger.Print(err.Error())
+		_ = h.Write500ErrorResponse(writer, err)
+		return
+	}
+	res, err := json.Marshal(idleHours)
+	if err != nil {
+		h.logger.Print(err.Error())
+		_ = h.Write500ErrorResponse(writer, err)
+		return
+	}
+	_ = h.WriteJSONResponse(writer, string(res), http.StatusOK)
+}

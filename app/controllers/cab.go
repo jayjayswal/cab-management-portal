@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"cab-management-portal/app/models"
+	"cab-management-portal/app/servies"
 	"context"
 	"errors"
 )
@@ -41,6 +42,10 @@ func (c *Controller) GetCabActivities(ctx context.Context, cabId int) ([]models.
 
 func (c *Controller) GetAllCabs(ctx context.Context) ([]models.Cab, error) {
 	return c.services.GetAllCabs(ctx)
+}
+
+func (c *Controller) GetCabIdleTime(ctx context.Context, cabId int) ([]servies.CabIdleDurationRes, error) {
+	return c.services.GetCabIdleTime(ctx, cabId)
 }
 
 type CreateCabPayload struct {

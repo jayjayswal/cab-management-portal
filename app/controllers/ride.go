@@ -22,22 +22,23 @@ func (c *Controller) BookCab(ctx context.Context, payload *BookCabPayload) (*Cab
 	if err != nil {
 		return nil, err
 	}
-	city, err := c.services.GetCity(ctx, payload.CityId)
+	city, err := c.services.GetCity(ctx, payload.StartCityId)
 	if err != nil {
 		return nil, err
 	}
 	if city.IsActive != 1 {
 		return nil, errors.New("this city is not active for cab booking currently")
 	}
-	cab, ride, err := c.services.BookCabTxn(ctx, payload.CityId)
+	cab, ride, err := c.services.BookCabTxn(ctx, payload.StartCityId, payload.EndCityId)
 	if err != nil {
 		return nil, err
 	}
 	if cab == nil {
-		go c.CreateCabRequestEntry(context.Background(), payload.CityId, models.UnFulfilledRequestRideStatus)
+		go c.CreateCabRequestEntry(context.Background(), payload.StartCityId, models.UnFulfilledRequestRideStatus)
 		return nil, errors.New("no cabs found")
 	} else {
-		go c.CreateCabRequestEntry(context.Background(), payload.CityId, models.FulfilledRequestRideStatus)
+		go c.CreateCabRequestEntry(context.Background(), payload.StartCityId, models.FulfilledRequestRideStatus)
+		go c.CreateCabIdleStateEntry(context.Background(), cab)
 		return &CabBooking{
 			Message:      "Cab booked successfully",
 			RideId:       ride.Id,
@@ -122,6 +123,25 @@ func (c *Controller) CreateCabRequestEntry(ctx context.Context, cityId int, stat
 	return nil
 }
 
+func (c *Controller) CreateCabIdleStateEntry(ctx context.Context, cab *models.Cab) error {
+	lastRideEndTime := cab.LastRideEndTime
+	if lastRideEndTime == nil {
+		lastRideEndTime = &cab.Created
+	}
+	object := models.CabIdleDuration{
+		CabId:         cab.Id,
+		IdleStartTime: *lastRideEndTime,
+		IdleEndTime:   time.Now().UTC(),
+		TotalDuration: time.Now().UTC().Sub(*lastRideEndTime).Hours(),
+	}
+	err := c.services.CreateCabIdleStateEntry(ctx, &object)
+	if err != nil {
+		c.logger.Print(err.Error())
+		return err
+	}
+	return nil
+}
+
 func (c *Controller) GetAllRides(ctx context.Context) ([]models.Ride, error) {
 	return c.services.GetAllRides(ctx)
 }
@@ -145,7 +165,8 @@ type CabBooking struct {
 }
 
 type BookCabPayload struct {
-	CityId int `json:"city_id" validate:"required"`
+	StartCityId int `json:"start_city_id" validate:"required"`
+	EndCityId   int `json:"end_city_id" validate:"required"`
 }
 
 type FinishRidePayload struct {

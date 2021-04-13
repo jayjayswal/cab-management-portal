@@ -53,6 +53,7 @@ type Services interface {
 	UpdateCabState(ctx context.Context, cab *models.Cab, tx *sqlx.Tx) error
 	UpdateCab(ctx context.Context, cab *models.Cab, tx *sqlx.Tx) error
 	GetAllCabs(ctx context.Context) ([]models.Cab, error)
+	GetCabIdleTime(ctx context.Context, id int) ([]CabIdleDurationRes, error)
 
 	CreateCity(ctx context.Context, city *models.City) error
 	GetCity(ctx context.Context, id int) (*models.City, error)
@@ -60,8 +61,9 @@ type Services interface {
 
 	UpdateRide(ctx context.Context, ride *models.Ride, tx *sqlx.Tx) error
 	CreateRideRequest(ctx context.Context, rideRequest *models.RideRequest) error
+	CreateCabIdleStateEntry(ctx context.Context, cabIdleDuration *models.CabIdleDuration) error
 	GetCityWiseRideInsight(ctx context.Context) ([]RideInsight, error)
-	BookCabTxn(ctx context.Context, cityId int) (*models.Cab, *models.Ride, error)
+	BookCabTxn(ctx context.Context, startCityId int, endCityId int) (*models.Cab, *models.Ride, error)
 	FinishRideTxn(ctx context.Context, rideId int) (*models.Cab, *models.Ride, error)
 	GetAllRides(ctx context.Context) ([]models.Ride, error)
 }

@@ -25,7 +25,7 @@ func Init(dependencies *utilEntities.Dependencies) *mux.Router {
 		controller,
 	)
 
-	dependencies.Router.HandleFunc("/health-check",handler.HealthCheck)
+	dependencies.Router.HandleFunc("/health-check", handler.HealthCheck)
 
 	apiRouter := dependencies.Router.PathPrefix("/api").Subrouter()
 	amw := utilEntities.AuthenticationMiddleware{}
@@ -42,6 +42,7 @@ func Init(dependencies *utilEntities.Dependencies) *mux.Router {
 	cabRouter.HandleFunc("/update-city", handler.UpdateCity).Methods(http.MethodPut)
 	cabRouter.HandleFunc("/recent-activities/{cabId}", handler.GetCabActivities).Methods(http.MethodGet)
 	cabRouter.HandleFunc("/all", handler.GetAllCabs).Methods(http.MethodGet)
+	cabRouter.HandleFunc("/idle-time/{cabId}", handler.GetCabIdleTime).Methods(http.MethodGet)
 	//articlesRouter.HandleFunc("/{articlesId}", handler.GetCity).Methods(http.MethodGet)
 
 	rideRouter := apiRouter.PathPrefix("/ride").Subrouter()

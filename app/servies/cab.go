@@ -167,3 +167,22 @@ func (s *Service) UpdateCabCityTxn(ctx context.Context, CabId int, CurrentCityId
 	}
 	return nil
 }
+
+func (s *Service) GetCabIdleTime(ctx context.Context, id int) ([]CabIdleDurationRes, error) {
+	var cabIdleDuration []CabIdleDurationRes
+	err := s.Sequel.SelectContext(ctx, &cabIdleDuration, "SELECT cab_id, round(sum(total_duration),2) as total_hours FROM "+
+		models.CabsIdleDurationTableName+
+		" WHERE cab_id=?  GROUP BY cab_id", id)
+	if err != nil {
+		return nil, err
+	}
+	if cabIdleDuration == nil {
+		cabIdleDuration = []CabIdleDurationRes{}
+	}
+	return cabIdleDuration, nil
+}
+
+type CabIdleDurationRes struct {
+	CabId      string  `db:"cab_id"`
+	TotalHours float64 `db:"total_hours"`
+}

@@ -24,29 +24,30 @@ CREATE TABLE `rides` (
 */
 
 type Ride struct {
-	Id            int        `db:"id"`
-	CabId         int        `db:"cab_id"`
-	StartCityId   int        `db:"start_city_id"`
-	StartTime     time.Time  `db:"start_time"`
-	EndTime       *time.Time `db:"end_time"`
-	CurrentState  string     `db:"current_state"`
-	Created       time.Time  `db:"created"`
-	Updated       time.Time  `db:"updated"`
+	Id           int        `db:"id"`
+	CabId        int        `db:"cab_id"`
+	StartCityId  int        `db:"start_city_id"`
+	EndCityId    int        `db:"end_city_id"`
+	StartTime    time.Time  `db:"start_time"`
+	EndTime      *time.Time `db:"end_time"`
+	CurrentState string     `db:"current_state"`
+	Created      time.Time  `db:"created"`
+	Updated      time.Time  `db:"updated"`
 }
 
 type RideRequest struct {
-	Id            int        `db:"id"`
-	StartCityId   int        `db:"start_city_id"`
-	CurrentState  string     `db:"current_state"`
-	Created       time.Time  `db:"created"`
-	Updated       time.Time  `db:"updated"`
+	Id           int       `db:"id"`
+	StartCityId  int       `db:"start_city_id"`
+	CurrentState string    `db:"current_state"`
+	Created      time.Time `db:"created"`
+	Updated      time.Time `db:"updated"`
 }
 
 const (
-	RidesTableName = "rides"
-	RideRequestTableName = "ride_requests"
-	InProgressRideStatus = "IN_PROGRESS"
-	FinishedRideStatus = "FINISHED"
-	FulfilledRequestRideStatus = "FULFILLED"
+	RidesTableName               = "rides"
+	RideRequestTableName         = "ride_requests"
+	InProgressRideStatus         = "IN_PROGRESS"
+	FinishedRideStatus           = "FINISHED"
+	FulfilledRequestRideStatus   = "FULFILLED"
 	UnFulfilledRequestRideStatus = "UNFULFILLED"
 )
